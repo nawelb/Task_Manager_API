@@ -11,7 +11,6 @@ const {List} = require('./db/models/list.model');
 //load middleware
 app.use(bodyParser.json());
 
-
  // CORS enabled with express/node-js : 
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");                                                                          
@@ -71,8 +70,9 @@ app.patch('/liste/:id', (req,res) =>{
  * DELETE /liste/:id
  * delete a specifique liste with id
  */
+// A REVOIR 
 app.delete('/liste/:id', (req, res) =>{
-    //
+    // findOneAndRemove({_id:req.params.id})
     List.findOneAndRemove({_id:req.params.id}, {
         $set:req.body
     }).then((newlist) => {
@@ -93,6 +93,19 @@ app.get('/liste/:listId/tasks', (req, res) => {
 });
 
 /**
+ * GET /liste/:listId/tasks/:taskId
+ * get a specific task in a specific list
+ */
+ app.get('/liste/:listId/tasks/:taskId', (req, res) => {
+    Task.findOne({
+        _listId: req.params.listId, 
+        _id: req.params.taskId
+    }).then((task) => {
+        res.send(task);
+    });
+})
+
+/**
  * POST /liste/:listeId/tasks
  * create a new task in a specific liste
  */
@@ -107,7 +120,33 @@ app.post('/liste/:listId/tasks', (req, res) => {
     });
 });
 
+/**
+ * PATCH /liste/:listId/tasks/:taskId
+ * update a specific task in a specific list
+ */
+app.patch('/liste/:listId/tasks/:taskId', (req, res) => {
+    Task.findOneAndUpdate({
+        _listId: req.params.listId, 
+        _id: req.params.taskId
+    }, {
+        $set:req.body
+    }).then(() => {
+        res.sendStatus(200);
+    });
+})
 
+/**
+ * DELETE /liste/:listID/tasks/:taskId
+ * delete a specific task in a specific list
+ */
+app.delete('/liste/:listId/tasks/:taskId', (req, res) => {
+    Task.findOneAndRemove({
+        _listId: req.params.listId, 
+        _id: req.params.taskId
+    }).then(() => {
+        res.sendStatus(200);
+    })
+})
 
 app.listen(3000, ()=> {
     console.log(`Running on port ${port}`);
